@@ -31,7 +31,7 @@ setup(
                                       ],
                   },     package_dir={'touch_sensor_proj': 'touch_sensor_proj'},
 
-    test_suite='tests',
+    test_suite='tests', install_requires=['rampy', 'numpy']
     # Additional entries you may want simply uncomment the lines you want and fill in the data
     # author_email='me@place.org',      # Author email
     # url='http://www.my_package.com',  # Website
