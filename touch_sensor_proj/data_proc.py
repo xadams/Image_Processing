@@ -27,6 +27,7 @@ def warning(*objs):
 
 
 def data_process(data_array):
+
     """
     1. Remove first 500 and last 600 value for each data
     and make a new matrix - useful_data
@@ -43,13 +44,10 @@ def data_process(data_array):
     kiri_4 = data_array[500:num_data - 600, 4]
     kiri_5 = data_array[500:num_data - 600, 5]
     kiri_6 = data_array[500:num_data - 600, 6]
-    roi = np.array([[1,2],[5,5.5],[9.5,10]])
+    roi = np.array([[1, 2], [5, 5.5], [9.5, 10]])
 
     useful_data = np.column_stack((kiri_1, kiri_2, kiri_3, kiri_4, kiri_5, kiri_6))
     # print("useful_data is ", useful_data.shape, type(useful_data))
-
-    #sorted_data = np.sort(useful_data)
-    # print("sorted_data is ", sorted_data.shape, type(sorted_data))
 
     y1, base1 = rampy.baseline(time, kiri_1, roi, 'poly', polynomial_order=1)
     y2, base2 = rampy.baseline(time, kiri_2, roi, 'poly', polynomial_order=1)
@@ -71,31 +69,37 @@ def data_process(data_array):
     return processed_data
 
 
-def plot_processed(base_f_name, processed_data):
+def peak_find(processed_data):
+
+    peaks1, _ = signal.find_peaks(processed_data[:, 1], distance=200)
+    peaks2, _ = signal.find_peaks(processed_data[:, 2], distance=200)
+    peaks3, _ = signal.find_peaks(processed_data[:, 3], distance=200)
+    peaks4, _ = signal.find_peaks(processed_data[:, 4], distance=200)
+    peaks5, _ = signal.find_peaks(processed_data[:, 5], distance=200)
+    peaks6, _ = signal.find_peaks(processed_data[:, 6], distance=200)
+
+    peaks = np.column_stack((peaks1, peaks2, peaks3, peaks4, peaks5, peaks6))
+    np.savetxt('peaks.csv', peaks, delimiter=',')
+    print("Wrote file: {}".format('peaks.csv'))
+
+    return peaks
 
 
-    # peaks, _ = signal.find_peaks(processed_data[:, 1])
-    # prominences = signal.peak_prominences(processed_data[:,1], peaks)[0]
-    # print("peaks is ", peaks, prominences)
-    # peaks_2, _ = find_peaks(processed_data[:, 2])
-    # prominence_2 = peak_prominences(processed_data[:,2], peaks_2)[0]
-    # peaks_3, _ = find_peaks(processed_data[:, 3])
-    # prominence_3 = peak_prominences(processed_data[:,3], peaks_3)[0]
-    # peaks_4, _ = find_peaks(processed_data[:, 4])
-    # prominence_4 = peak_prominences(processed_data[:,4], peaks_4)[0]
-    # peaks_5, _ = find_peaks(processed_data[:, 5])
-    # prominence_5 = peak_prominences(processed_data[:,5], peaks_5)[0]
-    # peaks_6, _ = find_peaks(processed_data[:, 6])
-    # prominence_6 = peak_prominences(processed_data[:,6], peaks_6)[0]
+def plot_processed(base_f_name, processed_data, peaks):
 
-
-    x_axis = processed_data[:,0]
+    x_axis = processed_data[:, 0]
     plt.plot(x_axis, processed_data[:, 1], 'r',
-             x_axis, processed_data[:, 2], 'b',
-             x_axis, processed_data[:, 3], 'g',
-             x_axis, processed_data[:, 4], 'y',
-             x_axis, processed_data[:, 5], 'c',
-             x_axis, processed_data[:, 6], 'k')
+             x_axis[peaks[:, 0]], processed_data[:, 1][peaks[:, 0]], "o", markeredgecolor='r', markerfacecolor='None')
+    plt.plot(x_axis, processed_data[:, 2], 'b',
+             x_axis[peaks[:, 1]], processed_data[:, 2][peaks[:, 1]], "o", markeredgecolor='b', markerfacecolor='None')
+    plt.plot(x_axis, processed_data[:, 3], 'g',
+             x_axis[peaks[:, 2]], processed_data[:, 3][peaks[:, 2]], "o", markeredgecolor='g', markerfacecolor='None')
+    plt.plot(x_axis, processed_data[:, 4], 'y',
+             x_axis[peaks[:, 3]], processed_data[:, 4][peaks[:, 3]], "o", markeredgecolor='y', markerfacecolor='None')
+    plt.plot(x_axis, processed_data[:, 5], 'c',
+             x_axis[peaks[:, 4]], processed_data[:, 5][peaks[:, 4]], "o", markeredgecolor='c', markerfacecolor='None')
+    plt.plot(x_axis, processed_data[:, 6], 'k',
+             x_axis[peaks[:, 5]], processed_data[:, 6][peaks[:, 5]], "o", markeredgecolor='k', markerfacecolor='None')
 
     plt.title('Kirigami Touch Sensor')
     plt.xlabel('Time')
@@ -106,6 +110,7 @@ def plot_processed(base_f_name, processed_data):
 
 
 def parse_cmdline(argv):
+
     """
     Returns the parsed argument list and return code.
     `argv` is a list of arguments, or `None` for ``sys.argv[1:]``.
@@ -133,9 +138,9 @@ def main(argv=None):
     args, ret = parse_cmdline(argv)
     if ret != SUCCESS:
         return ret
-    # print(args.csv_data_file)
+
     processed_data = data_process(args.csv_data)
-    # print(filtered_data)
+    peaks = peak_find(processed_data)
 
     # get the name of the input file without the directory it is in, if one was specified
     base_out_fname = os.path.basename(args.csv_data_file)
@@ -147,7 +152,7 @@ def main(argv=None):
     print("Wrote file: {}".format(out_fname))
     # send the base_out_fname and data to a new function that will plot the data
 
-    plot_processed(base_out_fname, processed_data)
+    plot_processed(base_out_fname, processed_data, peaks)
 
     return SUCCESS  # success
 
