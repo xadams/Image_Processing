@@ -12,16 +12,16 @@ from contextlib import contextmanager
 from io import StringIO
 import numpy as np
 import logging
-from touch_sensor_proj.data_proc import main, data_process, peak_find
+from Image_Processing.data_proc import main, data_process, peak_find
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 DISABLE_REMOVE = logger.isEnabledFor(logging.DEBUG)
-
-CURRENT_DIR = os.path.dirname(__file__)
-MAIN_DIR = os.path.join(CURRENT_DIR, '..')
-TEST_DATA_DIR = os.path.join(CURRENT_DIR, 'data_proc')
-PROJ_DIR = os.path.join(MAIN_DIR, 'touch_sensor_proj')
+# TODO: Remove output files after tests
+TEST_DIR = os.path.dirname(__file__)
+MAIN_DIR = os.path.join(TEST_DIR, '..')
+TEST_DATA_DIR = os.path.join(TEST_DIR, 'data_proc')
+PROJ_DIR = os.path.join(MAIN_DIR, 'Image_Processing')
 DATA_DIR = os.path.join(PROJ_DIR, 'data')
 SAMPLE_DATA_FILE_LOC = os.path.join(DATA_DIR, 'swipe_motion.csv')
 COL_TEST_FILE_LOC = os.path.join(TEST_DATA_DIR, 'swipe_motion_diff_cols.cav')
@@ -106,7 +106,7 @@ class TestDataPorcess(unittest.TestCase):
 
 class TestPeakfind(unittest.TestCase):
     def testPeakfind(self):
-        csv_data = np.loadtxt(fname=os.path.join(PROJ_DIR, 'swipe_motion_processed.csv'), delimiter=',')
+        csv_data = np.loadtxt(fname=os.path.join(TEST_DIR, 'swipe_motion_processed.csv'), delimiter=',')
         peak_results = peak_find(csv_data)
         expected_results = np.loadtxt(fname=os.path.join(TEST_DATA_DIR, "peaks_expected.csv"), delimiter=',')
         self.assertTrue(np.allclose(expected_results, peak_results))
