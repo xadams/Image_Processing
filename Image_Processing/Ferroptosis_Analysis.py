@@ -14,10 +14,10 @@ s1 = pd.read_excel(data, '60min 5uL Treated').dropna(thresh=3)
 s2 = pd.read_excel(data, '60min 5uL No Treatment').dropna(thresh=3)
 s1 = s1.iloc[:,:].values
 s2 = s2.iloc[:,:].values
-# red = s1[:,6]
-# green = s1[:,7]
-red = s2[:,6]
-green = s2[:,5]
+red = s1[:,6]
+green = s1[:,7]
+# red = s2[:,6]
+# green = s2[:,5]
 
 n = len(red)
 xval = np.linspace(0,n-1,n)
@@ -27,8 +27,8 @@ greendata = np.c_[xval,green]
 bounds = np.array([[0,1500],[1500,1600]])
 red_corrected, red_background = rampy.baseline(xval,red,bounds,"arPLS")
 green_corrected, green_background = rampy.baseline(xval, green,bounds,"arPLS")
-red_peaksx,red_peaksy = signal.find_peaks(red_corrected[:,0],height=300,distance=32)
-green_peaksx,green_peaksy = signal.find_peaks(green_corrected[:,0],height=300,distance=32)
+red_peaksx,red_peaksy = signal.find_peaks(red_corrected[:,0],height=300,distance=50)
+green_peaksx,green_peaksy = signal.find_peaks(green_corrected[:,0],height=300,distance=50)
 
 
 n_red_peaks = len(red_peaksx)
@@ -52,9 +52,9 @@ if n_red_peaks != n_green_peaks:
     else:
         print("Could not select an appropriate set of green peaks.")
 
-peak_ratio = red_peaksy['peak_heights'] / green_peaksy['peak_heights']
+peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
 # print("Peak ratio average: {}\nPeak ratio std: {}".format(peak_ratio.mean(), peak_ratio.std()))
-area_ratio = np.trapz(red_corrected,axis=0)/np.trapz(green_corrected,axis=0)
+area_ratio = np.trapz(green_corrected,axis=0)/np.trapz(red_corrected,axis=0)
 # print("Peak area average: {}".format(area_ratio[0]))
 
 # PLOT_RAW = True
