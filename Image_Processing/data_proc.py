@@ -34,6 +34,7 @@ def data_process(data_array):
     2. correct base line - corrected_data
     3. using filter, smooth the graph - filtered_data
     """
+    # TODO: Generalize removal of end data
     num_data, num_sensor = data_array.shape
     # print("data array is ", num_data, num_sensor)
 
