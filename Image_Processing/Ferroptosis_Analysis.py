@@ -7,9 +7,7 @@ import rampy
 from scipy import signal
 import os
 
-#ReadExcel = pd.read_excel ('Ferroptosis Data/1810006 RT+- Data.xlsx') #for an earlier version of Excel, you may need to use the file extension of 'xls'
 data = pd.ExcelFile ('data/180808ferropdata.xlsm')
-#overview = pd.read_excel(data, 'Summary')
 # sheets = ['60min 5uL No Treatment','60min 2uL No Treatment','60min 1uL No Treatment']
 sheets = ['60min 5uL Treated','60min 2uL Treated','60min 1uL Treated']
 frames = []
@@ -19,7 +17,6 @@ for sheet in sheets:
 
 fig, (ax1,ax2,ax3) = plt.subplots(3,1)
 axes = [ax1, ax2,ax3]
-# plt.subplot()
 for s, ax, title in zip(frames,axes,sheets):
     red_len = []
     green_len = []
@@ -36,18 +33,10 @@ for s, ax, title in zip(frames,axes,sheets):
     reddata= np.c_[xval,red]
     greendata = np.c_[xval,green]
     bounds = np.array([[0,1500],[1500,1600]])
-    # dists = np.linspace(10,60,11)
-    # dists = [30]
-    # h = 300
-    # for d in dists:
     red_corrected, red_background = rampy.baseline(xval,red,bounds,"arPLS")
     green_corrected, green_background = rampy.baseline(xval, green,bounds,"arPLS")
     red_peaksx,red_peaksy = signal.find_peaks(red_corrected[:,0],width=10,distance=10,height=1)
     green_peaksx,green_peaksy = signal.find_peaks(green_corrected[:,0],width=10,distance=10,height=1)
-        # red_len.append(len(red_peaksx))
-        # green_len.append(len(green_peaksx))
-    # plt.plot(dists,np.gradient(np.gradient(np.asarray(red_len))))
-    # plt.plot(dists,np.gradient(np.gradient(np.asarray(green_len))))
 
     n_red_peaks = len(red_peaksx)
     n_green_peaks = len(green_peaksx)
@@ -95,10 +84,6 @@ for s, ax, title in zip(frames,axes,sheets):
             'Area ratio=%.2f' % (area_ratio[0],)))
         ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
                  fontsize=14, verticalalignment='top')
-        # for i in range(n_red_peaks-1):
-        #     vline = (red_peaksx[i]+red_peaksx[i+1])/2
-        #     plt.axvline(x=vline, color='blue')
-
 
 plt.show()
 
