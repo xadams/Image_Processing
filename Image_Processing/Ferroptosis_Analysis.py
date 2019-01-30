@@ -10,72 +10,95 @@ import os
 #ReadExcel = pd.read_excel ('Ferroptosis Data/1810006 RT+- Data.xlsx') #for an earlier version of Excel, you may need to use the file extension of 'xls'
 data = pd.ExcelFile ('data/180808ferropdata.xlsm')
 #overview = pd.read_excel(data, 'Summary')
-s1 = pd.read_excel(data, '60min 5uL Treated').dropna(thresh=3)
-s2 = pd.read_excel(data, '60min 5uL No Treatment').dropna(thresh=3)
-s1 = s1.iloc[:,:].values
-s2 = s2.iloc[:,:].values
-red = s1[:,6]
-green = s1[:,7]
-# red = s2[:,6]
-# green = s2[:,5]
+# sheets = ['60min 5uL No Treatment','60min 2uL No Treatment','60min 1uL No Treatment']
+sheets = ['60min 5uL Treated','60min 2uL Treated','60min 1uL Treated']
+frames = []
 
-n = len(red)
-xval = np.linspace(0,n-1,n)
+for sheet in sheets:
+    frames.append(pd.read_excel(data, sheet).dropna(thresh=3))
 
-reddata= np.c_[xval,red]
-greendata = np.c_[xval,green]
-bounds = np.array([[0,1500],[1500,1600]])
-red_corrected, red_background = rampy.baseline(xval,red,bounds,"arPLS")
-green_corrected, green_background = rampy.baseline(xval, green,bounds,"arPLS")
-red_peaksx,red_peaksy = signal.find_peaks(red_corrected[:,0],height=300,distance=50)
-green_peaksx,green_peaksy = signal.find_peaks(green_corrected[:,0],height=300,distance=50)
-
-
-n_red_peaks = len(red_peaksx)
-n_green_peaks = len(green_peaksx)
-if n_red_peaks != n_green_peaks:
-    print("Mismatch in number of peaks: {} red peaks vs {} green peaks\nWill attempt to align".format(n_red_peaks,n_green_peaks))
-    aligned_green_peaks = []
-    for i, red_peak in enumerate(red_peaksx):
-        min = 50
-        for j, green_peak in enumerate(green_peaksx):
-            difference = abs(red_peak-green_peak)
-            if difference < min:
-                min = difference
-                index = j
-        aligned_green_peaks.append([green_peaksx[index],green_peaksy['peak_heights'][index]])
-    garray = np.asarray(aligned_green_peaks)
-    green_peaksx = garray[:,0]
-    green_peaksy['peak_heights'] = garray[:,1]
-    if n_red_peaks == len(green_peaksx):
-        print("Found equal number of red and green peaks.")
+fig, (ax1,ax2,ax3) = plt.subplots(3,1)
+axes = [ax1, ax2,ax3]
+# plt.subplot()
+for s, ax, title in zip(frames,axes,sheets):
+    red_len = []
+    green_len = []
+    if int(s['Ch1'].mean()) > int(s['Ch2'].mean()):
+        print("channel 1 is red")
+        red = s['Ch1'].values
+        green = s['Ch2'].values
     else:
-        print("Could not select an appropriate set of green peaks.")
+        green = s['Ch1'].values
+        red = s['Ch2'].values
+    n = len(red)
+    xval = np.linspace(0,n-1,n)
 
-peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
-# print("Peak ratio average: {}\nPeak ratio std: {}".format(peak_ratio.mean(), peak_ratio.std()))
-area_ratio = np.trapz(green_corrected,axis=0)/np.trapz(red_corrected,axis=0)
-# print("Peak area average: {}".format(area_ratio[0]))
+    reddata= np.c_[xval,red]
+    greendata = np.c_[xval,green]
+    bounds = np.array([[0,1500],[1500,1600]])
+    # dists = np.linspace(10,60,11)
+    # dists = [30]
+    # h = 300
+    # for d in dists:
+    red_corrected, red_background = rampy.baseline(xval,red,bounds,"arPLS")
+    green_corrected, green_background = rampy.baseline(xval, green,bounds,"arPLS")
+    red_peaksx,red_peaksy = signal.find_peaks(red_corrected[:,0],width=10,distance=10,height=1)
+    green_peaksx,green_peaksy = signal.find_peaks(green_corrected[:,0],width=10,distance=10,height=1)
+        # red_len.append(len(red_peaksx))
+        # green_len.append(len(green_peaksx))
+    # plt.plot(dists,np.gradient(np.gradient(np.asarray(red_len))))
+    # plt.plot(dists,np.gradient(np.gradient(np.asarray(green_len))))
 
-# PLOT_RAW = True
-fig, ax = plt.subplots()
-try:
-    if PLOT_RAW:
-        plt.plot(red, color='red')
-        plt.plot(green, color='green')
-except:
-    plt.plot(red_corrected, color='red')
-    plt.scatter(red_peaksx,red_peaksy['peak_heights'], color='blue', marker='o')
-    plt.plot(green_corrected, color='green')
-    plt.scatter(green_peaksx,green_peaksy['peak_heights'], color='orange', marker='o')
-    textstr = '\n'.join((
-        'Average peak ratio=%.2f' % (peak_ratio.mean(),),
-        'Peak ratio std=%.2f' % (peak_ratio.std(),),
-        'Area ratio=%.2f' % (area_ratio[0],)))
-    plt.text(0.05, 0.95, textstr, transform=ax.transAxes,
-             fontsize=14, verticalalignment='top')
-    # for i in range(n_red_peaks-1):
-    #     vline = (red_peaksx[i]+red_peaksx[i+1])/2
-    #     plt.axvline(x=vline, color='blue')
+    n_red_peaks = len(red_peaksx)
+    n_green_peaks = len(green_peaksx)
+    if n_red_peaks != n_green_peaks:
+        print("Mismatch in number of peaks: {} red peaks vs {} green peaks\nWill attempt to align".format(n_red_peaks,n_green_peaks))
+        aligned_green_peaks = []
+        for i, red_peak in enumerate(red_peaksx):
+            min = 20
+            for j, green_peak in enumerate(green_peaksx):
+                difference = abs(red_peak-green_peak)
+                if difference < min:
+                    min = difference
+                    index = j
+            if min == 20:
+                aligned_green_peaks.append([red_peaksx[i], green_corrected[red_peaksx[i]]])
+            else:
+                aligned_green_peaks.append([green_peaksx[index],green_peaksy['peak_heights'][index]])
+        garray = np.asarray(aligned_green_peaks)
+        green_peaksx = garray[:,0]
+        green_peaksy['peak_heights'] = garray[:,1]
+        if n_red_peaks == len(green_peaksx):
+            print("Found equal number of red and green peaks.")
+        else:
+            print("Could not select an appropriate set of green peaks.")
+
+    peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
+    # print("Peak ratio average: {}\nPeak ratio std: {}".format(peak_ratio.mean(), peak_ratio.std()))
+    area_ratio = np.trapz(green_corrected,axis=0)/np.trapz(red_corrected,axis=0)
+    # print("Peak area average: {}".format(area_ratio[0]))
+
+    # PLOT_RAW = True
+    try:
+        if PLOT_RAW:
+            ax.plot(red, color='red')
+            ax.plot(green, color='green')
+    except:
+        ax.set_title(title)
+        ax.plot(red_corrected, color='red')
+        ax.scatter(red_peaksx,red_peaksy['peak_heights'], color='blue', marker='o')
+        ax.plot(green_corrected, color='green')
+        ax.scatter(green_peaksx,green_peaksy['peak_heights'], color='orange', marker='o')
+        textstr = '\n'.join((
+            'Average peak ratio=%.2f' % (peak_ratio.mean(),),
+            'Peak ratio std=%.2f' % (peak_ratio.std(),),
+            'Area ratio=%.2f' % (area_ratio[0],)))
+        ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
+                 fontsize=14, verticalalignment='top')
+        # for i in range(n_red_peaks-1):
+        #     vline = (red_peaksx[i]+red_peaksx[i+1])/2
+        #     plt.axvline(x=vline, color='blue')
+
+
 plt.show()
 
