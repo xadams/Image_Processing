@@ -6,22 +6,15 @@ import numpy as np
 import rampy
 from scipy import signal
 import os
+import csv
 
 data = pd.ExcelFile ('data/180808ferropdata.xlsm')
-# sheets = ['60min 5uL No Treatment','60min 2uL No Treatment','60min 1uL No Treatment']
-sheets = ['60min 5uL Treated','60min 2uL Treated','60min 1uL Treated']
-frames = []
-
-for sheet in sheets:
-    frames.append(pd.read_excel(data, sheet).dropna(thresh=3))
-
-fig, (ax1,ax2,ax3) = plt.subplots(3,1)
-axes = [ax1, ax2,ax3]
-for s, ax, title in zip(frames,axes,sheets):
+results = {}
+for title in data.sheet_names:
+    s = pd.read_excel(data, title).dropna(thresh=3)
     red_len = []
     green_len = []
     if int(s['Ch1'].mean()) > int(s['Ch2'].mean()):
-        print("channel 1 is red")
         red = s['Ch1'].values
         green = s['Ch2'].values
     else:
@@ -41,7 +34,7 @@ for s, ax, title in zip(frames,axes,sheets):
     n_red_peaks = len(red_peaksx)
     n_green_peaks = len(green_peaksx)
     if n_red_peaks != n_green_peaks:
-        print("Mismatch in number of peaks: {} red peaks vs {} green peaks\nWill attempt to align".format(n_red_peaks,n_green_peaks))
+        # print("Mismatch in number of peaks: {} red peaks vs {} green peaks\nWill attempt to align".format(n_red_peaks,n_green_peaks))
         aligned_green_peaks = []
         for i, red_peak in enumerate(red_peaksx):
             min = 20
@@ -57,33 +50,36 @@ for s, ax, title in zip(frames,axes,sheets):
         garray = np.asarray(aligned_green_peaks)
         green_peaksx = garray[:,0]
         green_peaksy['peak_heights'] = garray[:,1]
-        if n_red_peaks == len(green_peaksx):
-            print("Found equal number of red and green peaks.")
-        else:
-            print("Could not select an appropriate set of green peaks.")
+        # if n_red_peaks == len(green_peaksx):
+        #     print("Found equal number of red and green peaks.")
+        # else:
+            # print("Could not select an appropriate set of green peaks.")
 
     peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
     # print("Peak ratio average: {}\nPeak ratio std: {}".format(peak_ratio.mean(), peak_ratio.std()))
     area_ratio = np.trapz(green_corrected,axis=0)/np.trapz(red_corrected,axis=0)
     # print("Peak area average: {}".format(area_ratio[0]))
-
+    results[title] = [peak_ratio.mean(),peak_ratio.std(),area_ratio[0]]
     # PLOT_RAW = True
-    try:
-        if PLOT_RAW:
-            ax.plot(red, color='red')
-            ax.plot(green, color='green')
-    except:
-        ax.set_title(title)
-        ax.plot(red_corrected, color='red')
-        ax.scatter(red_peaksx,red_peaksy['peak_heights'], color='blue', marker='o')
-        ax.plot(green_corrected, color='green')
-        ax.scatter(green_peaksx,green_peaksy['peak_heights'], color='orange', marker='o')
-        textstr = '\n'.join((
-            'Average peak ratio=%.2f' % (peak_ratio.mean(),),
-            'Peak ratio std=%.2f' % (peak_ratio.std(),),
-            'Area ratio=%.2f' % (area_ratio[0],)))
-        ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
-                 fontsize=14, verticalalignment='top')
+    # try:
+    #     if PLOT_RAW:
+    #         ax.plot(red, color='red')
+    #         ax.plot(green, color='green')
+    # except:
+    #     ax.set_title(title)
+    #     ax.plot(red_corrected, color='red')
+    #     ax.scatter(red_peaksx,red_peaksy['peak_heights'], color='blue', marker='o')
+    #     ax.plot(green_corrected, color='green')
+    #     ax.scatter(green_peaksx,green_peaksy['peak_heights'], color='orange', marker='o')
+    #     textstr = '\n'.join((
+    #         'Average peak ratio=%.2f' % (peak_ratio.mean(),),
+    #         'Peak ratio std=%.2f' % (peak_ratio.std(),),
+    #         'Area ratio=%.2f' % (area_ratio[0],)))
+    #     ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
+    #              fontsize=14, verticalalignment='top')
 
-plt.show()
+# plt.show()
 
+w = csv.writer(open("result_summary.csv", "w"))
+for key, val in results.items():
+    w.writerow([key, val])
