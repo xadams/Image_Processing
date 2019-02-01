@@ -18,26 +18,32 @@ Times = ["60","45","30"]
 Concs = ["5,", "2", "1"]
 Treatments = ["N", "T"]
 
+n_colors = 3
+blues = plt.cm.Blues(np.linspace(0.25,0.75,3))
+reds = plt.cm.Reds(np.linspace(0.25,0.75,3))
+cmap = [blues,reds]
+
 fig = plt.figure()
-for T in Times:
+for i,T in enumerate(Times):
     plt.title("Average Peak Ratios")
-    for Tr in Treatments:
+    for j,Tr in enumerate(Treatments):
         x = frame['Concentration'][(frame['Time']==T) & (frame['Treatment']==Tr)]
         y = frame['Average Peak Ratio'][(frame['Time']==T) & (frame['Treatment']==Tr)]
-        plt.plot(np.asarray(x,dtype=float),np.asarray(y,dtype=float),label="Time = {}, Treatment = {}".format(T,Tr))
+        plt.plot(np.asarray(x,dtype=float),np.asarray(y,dtype=float),label="Time = {}, Treatment = {}".format(T,Tr),color=cmap[j][i])
     plt.xlabel("Concentration ($\mu$L)")
     plt.ylabel("Average Peak Height")
     plt.legend(loc='best')
+plt.savefig("AveragePeakRatios.png")
 
 fig = plt.figure()
-for T in Times:
+for i,T in enumerate(Times):
     plt.title("Area Ratios")
-    for Tr in Treatments:
+    for j,Tr in enumerate(Treatments):
         x = frame['Concentration'][(frame['Time']==T) & (frame['Treatment']==Tr)]
         y = frame['Area Ratio'][(frame['Time']==T) & (frame['Treatment']==Tr)]
-        plt.plot(np.asarray(x,dtype=float),np.asarray(y,dtype=float),label="Time = {}, Treatment = {}".format(T,Tr))
+        plt.plot(np.asarray(x,dtype=float),np.asarray(y,dtype=float),label="Time = {}, Treatment = {}".format(T,Tr),color=cmap[j][i])
     plt.xlabel("Concentration ($\mu$L)")
-    plt.ylabel("Average Peak Height")
+    plt.ylabel("Area Ratio")
     plt.legend(loc='best')
-
-plt.show()
+plt.savefig("AreaRatio.png")
+# plt.show()
