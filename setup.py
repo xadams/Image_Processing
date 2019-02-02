@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Touch_Sensor_Proj
-Processing data for kirigami touch sensor
+Image_Processing
+Processing data for microscope data
 """
 from setuptools import setup
 import versioneer
@@ -10,7 +10,7 @@ DOCLINES = __doc__.split("\n")
 
 setup(
     # Self-descriptive entries which should always be present
-    name='touch_sensor_proj',
+    name='Image_Processing',
     author='xadams',
     description=DOCLINES[0],
     long_description="\n".join(DOCLINES[2:]),
@@ -19,17 +19,17 @@ setup(
     license='MIT',
 
     # Which Python importable modules should be included when your package is installed
-    packages=['touch_sensor_proj'],
+    packages=['Image_Processing'],
 
     # Optional include package data to ship with your package
     # Comment out this line to prevent the files from being packaged with your software
     # Extend/modify the list to include/exclude other items as need be
-    package_data={'touch_sensor_proj': ["data/*.dat"]
+    package_data={'Image_Processing': ["data/*.dat"]
                   },
 
-    entry_points={'console_scripts': ['data_proc = touch_sensor_proj.data_proc:main',
+    entry_points={'console_scripts': ['image_proc = Image_Processing.Ferroptosis:main',
                                       ],
-                  },     package_dir={'touch_sensor_proj': 'touch_sensor_proj'},
+                  },     package_dir={'Image_Processing': 'image_proc'},
 
     test_suite='tests', install_requires=['rampy', 'numpy']
     # Additional entries you may want simply uncomment the lines you want and fill in the data
