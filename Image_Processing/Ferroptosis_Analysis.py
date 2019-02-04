@@ -28,9 +28,7 @@ def proc_sheet():
         red_peaksx,red_peaksy = signal.find_peaks(red_corrected[:,0],width=10,distance=10,height=1)
         green_peaksx,green_peaksy = signal.find_peaks(green_corrected[:,0],width=10,distance=10,height=1)
 
-        n_red_peaks = len(red_peaksx)
-        n_green_peaks = len(green_peaksx)
-        if n_red_peaks != n_green_peaks:
+        if len(red_peaksx) != len(green_peaksx):
             # print("Mismatch in number of peaks: {} red peaks vs {} green peaks\nWill attempt to align".format(n_red_peaks,n_green_peaks))
             aligned_green_peaks = []
             for i, red_peak in enumerate(red_peaksx):
@@ -45,17 +43,10 @@ def proc_sheet():
                 else:
                     aligned_green_peaks.append([green_peaksx[index],green_peaksy['peak_heights'][index]])
             garray = np.asarray(aligned_green_peaks)
-            green_peaksx = garray[:,0]
             green_peaksy['peak_heights'] = garray[:,1]
-            # if n_red_peaks == len(green_peaksx):
-            #     print("Found equal number of red and green peaks.")
-            # else:
-                # print("Could not select an appropriate set of green peaks.")
 
         peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
-        # print("Peak ratio average: {}\nPeak ratio std: {}".format(peak_ratio.mean(), peak_ratio.std()))
         area_ratio = np.trapz(green_corrected,axis=0)/np.trapz(red_corrected,axis=0)
-        # print("Peak area average: {}".format(area_ratio[0]))
         results[title] = [peak_ratio.mean(),peak_ratio.std(),area_ratio[0]]
         # PLOT_RAW = True
         # try:
@@ -67,6 +58,7 @@ def proc_sheet():
         #     ax.plot(red_corrected, color='red')
         #     ax.scatter(red_peaksx,red_peaksy['peak_heights'], color='blue', marker='o')
         #     ax.plot(green_corrected, color='green')
+        #     green_peaksx = garray[:, 0]
         #     ax.scatter(green_peaksx,green_peaksy['peak_heights'], color='orange', marker='o')
         #     textstr = '\n'.join((
         #         'Average peak ratio=%.2f' % (peak_ratio.mean(),),
