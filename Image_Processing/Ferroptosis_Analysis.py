@@ -1,7 +1,5 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import sys
-import argparse
 import numpy as np
 import rampy
 from scipy import signal

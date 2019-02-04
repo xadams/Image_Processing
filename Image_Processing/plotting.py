@@ -17,19 +17,19 @@ def plot_FA(input="result_summary.csv", show=False):
     frame = pd.DataFrame(results, columns=['Time', 'Concentration', 'Treatment', 'Average Peak Ratio', 'Peak Ratio std',
                                            'Area Ratio'])
 
-    Times = ["60", "45", "30"]
-    Concs = ["5,", "2", "1"]
-    Treatments = ["N", "T"]
+    times = ["60", "45", "30"]
+    concs = ["5,", "2", "1"]
+    treatments = ["N", "T"]
 
-    n_colors = 3
-    blues = plt.cm.Blues(np.linspace(0.25, 0.75, 3))
-    reds = plt.cm.Reds(np.linspace(0.25, 0.75, 3))
+    n_colors = len(times)
+    blues = plt.cm.Blues(np.linspace(0.25, 0.75, n_colors))
+    reds = plt.cm.Reds(np.linspace(0.25, 0.75, n_colors))
     cmap = [blues, reds]
 
     plt.figure()
-    for i, T in enumerate(Times):
+    for i, T in enumerate(times):
         plt.title("Average Peak Ratios")
-        for j, Tr in enumerate(Treatments):
+        for j, Tr in enumerate(treatments):
             x = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             y = frame['Average Peak Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
@@ -41,9 +41,9 @@ def plot_FA(input="result_summary.csv", show=False):
         plt.savefig("AveragePeakRatios.png")
 
     plt.figure()
-    for i, T in enumerate(Times):
+    for i, T in enumerate(times):
         plt.title("Area Ratios")
-        for j, Tr in enumerate(Treatments):
+        for j, Tr in enumerate(treatments):
             x = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             y = frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
