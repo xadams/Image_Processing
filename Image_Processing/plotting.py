@@ -16,9 +16,9 @@ def plot_FA(input="result_summary.csv", show=False):
                             row[1].split()[2].strip(",").strip("]")])
     frame = pd.DataFrame(results, columns=['Time', 'Concentration', 'Treatment', 'Average Peak Ratio', 'Peak Ratio std',
                                            'Area Ratio'])
-
-    times = ["60", "45", "30"]
-    concs = ["5,", "2", "1"]
+    #TODO:Add check that flags if times,concs, or treatments are unexpected values
+    times = frame.Time.unique()
+    concs = frame.Concentration.unique()
     treatments = ["N", "T"]
 
     n_colors = len(times)
