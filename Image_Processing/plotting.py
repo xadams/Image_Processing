@@ -9,8 +9,8 @@ def plot_FA(input="result_summary.csv", show=False):
     with open(input, "rt") as csvfile:
         fin = csv.reader(csvfile)
         for row in fin:
-            title = row[0]
-            results.append([title[0:2], title[6], title[10],
+            title = row[0].split()
+            results.append([title[0][0:2], title[1][0], title[2][0],
                             row[1].split()[0].strip(",").strip("["),
                             row[1].split()[1].strip(",").strip("["),
                             row[1].split()[2].strip(",").strip("]")])
