@@ -8,9 +8,9 @@ from plotting import plot_FA
 import os
 import matplotlib.pyplot as plt
 
-def proc_sheet(plot_peaks=False):
 
-    data = pd.ExcelFile ('data/180808ferropdata.xlsm')
+def proc_sheet(plot_peaks=False):
+    data = pd.ExcelFile('data/180808ferropdata.xlsm')
     results = {}
     # for title in ["60min 1uL Treated"]:
     for title in data.sheet_names:
@@ -22,13 +22,13 @@ def proc_sheet(plot_peaks=False):
             green = s['Ch1'].values
             red = s['Ch2'].values
         n = len(red)
-        xval = np.linspace(0,n-1,n)
+        xval = np.linspace(0, n - 1, n)
 
-        bounds = np.array([[0,1500],[1500,1600]])
-        red_corrected, red_background = rampy.baseline(xval,red,bounds,"arPLS")
-        green_corrected, green_background = rampy.baseline(xval, green,bounds,"arPLS")
-        red_peaksx,red_peaksy = signal.find_peaks(red_corrected[:,0],width=10,distance=10,height=1)
-        green_peaksx,green_peaksy = signal.find_peaks(green_corrected[:,0],width=10,distance=10,height=1)
+        bounds = np.array([[0, 1500], [1500, 1600]])
+        red_corrected, red_background = rampy.baseline(xval, red, bounds, "arPLS")
+        green_corrected, green_background = rampy.baseline(xval, green, bounds, "arPLS")
+        red_peaksx, red_peaksy = signal.find_peaks(red_corrected[:, 0], width=10, distance=10, height=1)
+        green_peaksx, green_peaksy = signal.find_peaks(green_corrected[:, 0], width=10, distance=10, height=1)
 
         if len(red_peaksx) != len(green_peaksx):
             # print("Mismatch in number of peaks: {} red peaks vs {} green peaks\nWill attempt to align".format(n_red_peaks,n_green_peaks))
@@ -36,24 +36,24 @@ def proc_sheet(plot_peaks=False):
             for i, red_peak in enumerate(red_peaksx):
                 min = 20
                 for j, green_peak in enumerate(green_peaksx):
-                    difference = abs(red_peak-green_peak)
+                    difference = abs(red_peak - green_peak)
                     if difference < min:
                         min = difference
                         index = j
                 if min == 20:
                     aligned_green_peaks.append([red_peaksx[i], green_corrected[red_peaksx[i]]])
                 else:
-                    aligned_green_peaks.append([green_peaksx[index],green_peaksy['peak_heights'][index]])
+                    aligned_green_peaks.append([green_peaksx[index], green_peaksy['peak_heights'][index]])
             garray = np.asarray(aligned_green_peaks)
-            green_peaksy['peak_heights'] = garray[:,1]
-            green_peaksx = garray[:,0]
+            green_peaksy['peak_heights'] = garray[:, 1]
+            green_peaksx = garray[:, 0]
 
         peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
-        area_ratio = np.trapz(green_corrected,axis=0)/np.trapz(red_corrected,axis=0)
-        results[title] = [peak_ratio.mean(),peak_ratio.std(),area_ratio[0]]
+        area_ratio = np.trapz(green_corrected, axis=0) / np.trapz(red_corrected, axis=0)
+        results[title] = [peak_ratio.mean(), peak_ratio.std(), area_ratio[0]]
         # PLOT_RAW = True
         if plot_peaks:
-            fig,ax = plt.subplots()
+            fig, ax = plt.subplots()
             try:
                 if PLOT_RAW:
                     ax.plot(red, color='red')
@@ -61,9 +61,9 @@ def proc_sheet(plot_peaks=False):
             except:
                 ax.set_title("60min 1μM Treated")
                 ax.plot(red_corrected, color='red')
-                ax.scatter(red_peaksx,red_peaksy['peak_heights'], color=plt.cm.Reds([0.75]), marker='o')
+                ax.scatter(red_peaksx, red_peaksy['peak_heights'], color=plt.cm.Reds([0.75]), marker='o')
                 ax.plot(green_corrected, color='green')
-                ax.scatter(green_peaksx,green_peaksy['peak_heights'], color='darkgreen', marker='o')
+                ax.scatter(green_peaksx, green_peaksy['peak_heights'], color='darkgreen', marker='o')
                 ax.set_xlabel("Length (μm)")
                 ax.set_ylabel("Intensity")
                 # textstr = '\n'.join((
@@ -78,10 +78,12 @@ def proc_sheet(plot_peaks=False):
     for key, val in results.items():
         w.writerow([key, val])
 
+
 def main():
     if not os.path.isfile("result_summary.csv"):
         proc_sheet(True)
     plot_FA("result_summary.csv", show=True)
+
 
 if __name__ == "__main__":
     status = main()
