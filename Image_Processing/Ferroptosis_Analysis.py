@@ -7,6 +7,7 @@ import csv
 from plotting import plot_FA
 import os
 import matplotlib.pyplot as plt
+import warnings
 
 
 def proc_sheet(plot_peaks=False):
@@ -23,13 +24,13 @@ def proc_sheet(plot_peaks=False):
             red = s['Ch2'].values
         n = len(red)
         xval = np.linspace(0, n - 1, n)
-
-        bounds = np.array([[0, 1500], [1500, 1600]])
-        red_corrected, red_background = rampy.baseline(xval, red, bounds, "arPLS")
-        green_corrected, green_background = rampy.baseline(xval, green, bounds, "arPLS")
-        red_peaksx, red_peaksy = signal.find_peaks(red_corrected[:, 0], width=10, distance=10, height=1)
-        green_peaksx, green_peaksy = signal.find_peaks(green_corrected[:, 0], width=10, distance=10, height=1)
-
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            bounds = np.array([[0, 1500], [1500, 1600]])
+            red_corrected, red_background = rampy.baseline(xval, red, bounds, "arPLS")
+            green_corrected, green_background = rampy.baseline(xval, green, bounds, "arPLS")
+            red_peaksx, red_peaksy = signal.find_peaks(red_corrected[:, 0], width=10, distance=10, height=1)
+            green_peaksx, green_peaksy = signal.find_peaks(green_corrected[:, 0], width=10, distance=10, height=1)
         if len(red_peaksx) != len(green_peaksx):
             # print("Mismatch in number of peaks: {} red peaks vs {} green peaks\nWill attempt to align".format(n_red_peaks,n_green_peaks))
             aligned_green_peaks = []
@@ -81,7 +82,7 @@ def proc_sheet(plot_peaks=False):
 
 def main():
     if not os.path.isfile("result_summary.csv"):
-        proc_sheet(True)
+        proc_sheet()
     plot_FA("result_summary.csv", show=True)
 
 
