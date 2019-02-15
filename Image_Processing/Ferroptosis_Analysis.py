@@ -6,11 +6,13 @@ from scipy import signal
 import csv
 from plotting import plot_FA
 import os
+import matplotlib.pyplot as plt
 
-def proc_sheet():
+def proc_sheet(plot_peaks=False):
 
     data = pd.ExcelFile ('data/180808ferropdata.xlsm')
     results = {}
+    # for title in ["60min 1uL Treated"]:
     for title in data.sheet_names:
         s = pd.read_excel(data, title).dropna(thresh=3)
         if int(s['Ch1'].mean()) > int(s['Ch2'].mean()):
@@ -44,30 +46,33 @@ def proc_sheet():
                     aligned_green_peaks.append([green_peaksx[index],green_peaksy['peak_heights'][index]])
             garray = np.asarray(aligned_green_peaks)
             green_peaksy['peak_heights'] = garray[:,1]
+            green_peaksx = garray[:,0]
 
         peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
         area_ratio = np.trapz(green_corrected,axis=0)/np.trapz(red_corrected,axis=0)
         results[title] = [peak_ratio.mean(),peak_ratio.std(),area_ratio[0]]
         # PLOT_RAW = True
-        # try:
-        #     if PLOT_RAW:
-        #         ax.plot(red, color='red')
-        #         ax.plot(green, color='green')
-        # except:
-        #     ax.set_title(title)
-        #     ax.plot(red_corrected, color='red')
-        #     ax.scatter(red_peaksx,red_peaksy['peak_heights'], color='blue', marker='o')
-        #     ax.plot(green_corrected, color='green')
-        #     green_peaksx = garray[:, 0]
-        #     ax.scatter(green_peaksx,green_peaksy['peak_heights'], color='orange', marker='o')
-        #     textstr = '\n'.join((
-        #         'Average peak ratio=%.2f' % (peak_ratio.mean(),),
-        #         'Peak ratio std=%.2f' % (peak_ratio.std(),),
-        #         'Area ratio=%.2f' % (area_ratio[0],)))
-        #     ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
-        #              fontsize=14, verticalalignment='top')
-
-    # plt.show()
+        if plot_peaks:
+            fig,ax = plt.subplots()
+            try:
+                if PLOT_RAW:
+                    ax.plot(red, color='red')
+                    ax.plot(green, color='green')
+            except:
+                ax.set_title("60min 1μM Treated")
+                ax.plot(red_corrected, color='red')
+                ax.scatter(red_peaksx,red_peaksy['peak_heights'], color=plt.cm.Reds([0.75]), marker='o')
+                ax.plot(green_corrected, color='green')
+                ax.scatter(green_peaksx,green_peaksy['peak_heights'], color='darkgreen', marker='o')
+                ax.set_xlabel("Length (μm)")
+                ax.set_ylabel("Intensity")
+                # textstr = '\n'.join((
+                #     'Average peak ratio=%.2f' % (peak_ratio.mean(),),
+                #     'Peak ratio std=%.2f' % (peak_ratio.std(),),
+                #     'Area ratio=%.2f' % (area_ratio[0],)))
+                # ax.text(0.05, 0.95, textstr, transform=ax.transAxes,
+                #          fontsize=14, verticalalignment='top')
+        plt.show()
 
     w = csv.writer(open("result_summary.csv", "w"))
     for key, val in results.items():
@@ -75,7 +80,7 @@ def proc_sheet():
 
 def main():
     if not os.path.isfile("result_summary.csv"):
-        proc_sheet()
+        proc_sheet(True)
     plot_FA("result_summary.csv", show=True)
 
 if __name__ == "__main__":

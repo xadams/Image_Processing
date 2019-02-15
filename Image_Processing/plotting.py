@@ -33,12 +33,12 @@ def plot_FA(input="result_summary.csv", show=False):
             x = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             y = frame['Average Peak Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
-                     label="Time = {}, Treatment = {}".format(T, Tr), color=cmap[j][i])
-        plt.xlabel("Concentration ($\mu$L)")
-        plt.ylabel("Average Peak Height")
+                     label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
+        plt.xlabel("Concentration ($\mu$M)")
+        plt.ylabel("Average Peak Height Ratio")
         plt.legend(loc='best')
     if not show:
-        plt.savefig("AveragePeakRatios.png")
+        plt.savefig("PeakHeightRatios.png")
 
     plt.figure()
     for i, T in enumerate(times):
@@ -47,10 +47,10 @@ def plot_FA(input="result_summary.csv", show=False):
             x = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             y = frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
-                     label="Time = {}, Treatment = {}".format(T, Tr), color=cmap[j][i])
-        plt.xlabel("Concentration ($\mu$L)")
-        plt.ylabel("Area Ratio")
-        plt.legend(loc='best')
+                     label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
+        plt.xlabel("Concentration ($\mu$M)")
+        plt.ylabel("Average Peak Area Ratio")
+        plt.legend(loc='lower right')
     if not show:
         plt.savefig("AreaRatio.png")
     else:
