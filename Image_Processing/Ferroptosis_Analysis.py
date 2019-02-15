@@ -83,7 +83,7 @@ def proc_sheet(plot_peaks=False):
 def main():
     if not os.path.isfile("result_summary.csv"):
         proc_sheet()
-    plot_FA("result_summary.csv", show=True)
+    plot_FA("result_summary.csv", show=False)
 
 
 if __name__ == "__main__":

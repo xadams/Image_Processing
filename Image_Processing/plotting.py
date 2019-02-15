@@ -25,32 +25,30 @@ def plot_FA(input="result_summary.csv", show=False):
     blues = plt.cm.Blues(np.linspace(0.25, 0.75, n_colors))
     reds = plt.cm.Reds(np.linspace(0.25, 0.75, n_colors))
     cmap = [blues, reds]
-
-    plt.figure()
     for i, T in enumerate(times):
-        plt.title("Average Peak Ratios")
+        plt.title("Average Ratio of Green to Red Intensity Peak Heights")
         for j, Tr in enumerate(treatments):
             x = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             y = frame['Average Peak Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
                      label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
-        plt.xlabel("Concentration ($\mu$M)")
-        plt.ylabel("Average Peak Height Ratio")
+        plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
+        plt.ylabel("Ratio of Green to Red Intensity")
         plt.legend(loc='best')
     if not show:
         plt.savefig("PeakHeightRatios.png")
 
     plt.figure()
     for i, T in enumerate(times):
-        plt.title("Area Ratios")
+        plt.title("Average Ratio of Green to Red Intensity Peak Areas")
         for j, Tr in enumerate(treatments):
             x = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             y = frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
                      label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
-        plt.xlabel("Concentration ($\mu$M)")
-        plt.ylabel("Average Peak Area Ratio")
-        plt.legend(loc='lower right')
+        plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
+        plt.ylabel("Ratio of Green to Red Intensity")
+        # plt.legend(loc='lower right')
     if not show:
         plt.savefig("AreaRatio.png")
     else:
