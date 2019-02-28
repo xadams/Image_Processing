@@ -30,7 +30,8 @@ def plot_FA(input="result_summary.csv", show=False):
         for j, Tr in enumerate(treatments):
             x = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             y = frame['Average Peak Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
-            plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
+            err = frame['Peak Ratio std'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
+            plt.errorbar(np.asarray(x, dtype=float), np.asarray(y, dtype=float), yerr=np.asarray(err, dtype=float),
                      label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
         plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
         plt.ylabel("Ratio of Green to Red Intensity")
