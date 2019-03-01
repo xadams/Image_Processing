@@ -35,18 +35,20 @@ def plot_FA(input="result_summary.csv", show=False):
             yerr = []
             x_samples = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             for x in x_samples.unique():
-                y_samples = np.asarray(frame['Average Peak Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr) & (frame['Concentration'] == x)],dtype=float)
+                y_samples = np.asarray(frame['Average Peak Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr) & (
+                            frame['Concentration'] == x)], dtype=float)
                 xbar.append(x)
                 ybar.append(y_samples.mean())
                 yerr.append(y_samples.std())
-            plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float), yerr=np.asarray(yerr, dtype=float),
-                     label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
+            plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
+                         yerr=np.asarray(yerr, dtype=float),
+                         label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
         plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
         plt.ylabel("Ratio of Green to Red Intensity")
         plt.legend(loc='best')
     if not show:
         inputbase = input.split('_')[0]
-        plt.savefig(inputbase + "_PeakHeightRatios_corrected.png")
+        plt.savefig(inputbase + "_PeakHeightRatios.png")
 
     plt.figure()
     for i, T in enumerate(times):
@@ -57,7 +59,8 @@ def plot_FA(input="result_summary.csv", show=False):
             yerr = []
             x_samples = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             for x in x_samples.unique():
-                y_samples = np.asarray(frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr) & (frame['Concentration'] == x)],dtype=float)
+                y_samples = np.asarray(frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr) & (
+                            frame['Concentration'] == x)], dtype=float)
                 xbar.append(x)
                 ybar.append(y_samples.mean())
                 yerr.append(y_samples.std())
@@ -68,6 +71,6 @@ def plot_FA(input="result_summary.csv", show=False):
         plt.ylabel("Ratio of Green to Red Intensity")
         # plt.legend(loc='lower right')
     if not show:
-        plt.savefig(inputbase + "_AreaRatio_corrected.png")
+        plt.savefig(inputbase + "_AreaRatio.png")
     else:
         plt.show()
