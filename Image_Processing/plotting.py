@@ -20,7 +20,6 @@ def plot_FA(input="result_summary.csv", show=False):
                                            'Area Ratio', 'Replica']).sort_values(by=['Concentration'])
     # TODO:Add check that flags if times,concs, or treatments are unexpected values
     times = frame.Time.unique()
-    concs = frame.Concentration.unique()
     treatments = frame.Treatment.unique()
 
     n_colors = len(times)
@@ -42,13 +41,12 @@ def plot_FA(input="result_summary.csv", show=False):
                 yerr.append(y_samples.std())
             plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float), yerr=np.asarray(yerr, dtype=float),
                      label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
-            # plt.plot(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
-            #          label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
         plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
         plt.ylabel("Ratio of Green to Red Intensity")
         plt.legend(loc='best')
     if not show:
-        plt.savefig("PeakHeightRatios.png")
+        inputbase = input.split('_')[0]
+        plt.savefig(inputbase + "_PeakHeightRatios_corrected.png")
 
     plt.figure()
     for i, T in enumerate(times):
@@ -58,7 +56,6 @@ def plot_FA(input="result_summary.csv", show=False):
             ybar = []
             yerr = []
             x_samples = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
-            # y = frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
             for x in x_samples.unique():
                 y_samples = np.asarray(frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr) & (frame['Concentration'] == x)],dtype=float)
                 xbar.append(x)
@@ -67,12 +64,10 @@ def plot_FA(input="result_summary.csv", show=False):
             plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
                          yerr=np.asarray(yerr, dtype=float),
                          label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
-            # plt.plot(np.asarray(x, dtype=float), np.asarray(y, dtype=float),
-            #          label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
         plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
         plt.ylabel("Ratio of Green to Red Intensity")
         # plt.legend(loc='lower right')
     if not show:
-        plt.savefig("AreaRatio.png")
+        plt.savefig(inputbase + "_AreaRatio_corrected.png")
     else:
         plt.show()

@@ -92,7 +92,9 @@ def main():
     filename = "data/190221.xlsx"
     outname = os.path.splitext(filename)[0] + "_result_summary.csv"
     if not os.path.isfile(outname):
-        proc_sheet(filename, outname, True)
+        proc_sheet(filename, outname, False)
+    # Comment following line in for peak graphs and debugging
+    # proc_sheet(filename,outname, True)
     plot_FA(outname, show=True)
 
 
