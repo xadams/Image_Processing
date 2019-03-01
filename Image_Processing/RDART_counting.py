@@ -25,6 +25,7 @@ red_list = []
 pink_list = []
 results = {}
 for sheet in data.sheet_names:
+    # TODO: combine individual lists into a single dataframe for more efficient manipulation
     ind_list.append(s[sheet]['No.'])
     distance_list.append(s[sheet]['Distance [µm]'])
     blue_list.append(s[sheet]['DAPI(1)'])
@@ -53,7 +54,7 @@ for i, num in enumerate(edges):
     for col, color in zip(cols, colors):
         raw = col[num[0]:end[0]]
         n = len(raw)
-        bound = np.array([[x.iloc[0], 100], [100, x.iloc[-1]]])
+        bound = np.array([[x.iloc[0], 50], [50, x.iloc[-1]]])
         if col.name == RED_LABEL:
             maxred = raw.max()
             ratio = maxgreen / maxred
@@ -78,8 +79,9 @@ for i, num in enumerate(edges):
     if PLOT:
         plt.show()
     results[i] = [ratio, greentest, redtest, pinkbackground, pinkmax]
+    print("Wrote result {}".format(i))
 
-w = csv.writer(open("RDART_counting_summary.csv", "w"))
+w = csv.writer(open("RDART_counting_summary_test.csv", "w"))
 w.writerow(COLUMN_TITLES)
 for key, val in results.items():
     w.writerow([key, val])
