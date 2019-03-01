@@ -10,18 +10,26 @@ import matplotlib.pyplot as plt
 import warnings
 
 
-def proc_sheet(plot_peaks=False):
-    data = pd.ExcelFile('data/180808ferropdata.xlsm')
+def proc_sheet(filename, outname, plot_peaks=False):
+    data = pd.ExcelFile(filename)
     results = {}
     # for title in ["60min 1uL Treated"]:
     for title in data.sheet_names:
         s = pd.read_excel(data, title).dropna(thresh=3)
-        if int(s['Ch1'].mean()) > int(s['Ch2'].mean()):
-            red = s['Ch1'].values
-            green = s['Ch2'].values
+        if 'CY3(1)' in s.columns:
+            red = s['CY3(1)'].values
+            green = s['FITC(1)'].values
+        elif 'Ch1' in s.columns:
+            if int(s['Ch1'].mean()) > int(s['Ch2'].mean()):
+                red = s['Ch1'].values
+                green = s['Ch2'].values
+            else:
+                green = s['Ch1'].values
+                red = s['Ch2'].values
         else:
-            green = s['Ch1'].values
-            red = s['Ch2'].values
+            print("Neither 'CY3(1)' nor 'Ch1' columns detected. Exiting")
+            exit(2)
+            # TODO: Make this exit in a more pythonic way
         n = len(red)
         xval = np.linspace(0, n - 1, n)
         with warnings.catch_warnings():
@@ -60,7 +68,7 @@ def proc_sheet(plot_peaks=False):
                     ax.plot(red, color='red')
                     ax.plot(green, color='green')
             except:
-                ax.set_title("60min 1μM Treated")
+                ax.set_title(title)
                 ax.plot(red_corrected, color='red')
                 ax.scatter(red_peaksx, red_peaksy['peak_heights'], color=plt.cm.Reds([0.75]), marker='o')
                 ax.plot(green_corrected, color='green')
@@ -75,15 +83,17 @@ def proc_sheet(plot_peaks=False):
                 #          fontsize=14, verticalalignment='top')
         plt.show()
 
-    w = csv.writer(open("result_summary.csv", "w"))
+    w = csv.writer(open(outname, "w"))
     for key, val in results.items():
         w.writerow([key, val])
 
 
 def main():
-    if not os.path.isfile("result_summary.csv"):
-        proc_sheet(True)
-    plot_FA("result_summary.csv", show=True)
+    filename = "data/190221.xlsx"
+    outname = os.path.splitext(filename)[0] + "_result_summary.csv"
+    if not os.path.isfile(outname):
+        proc_sheet(filename, outname, True)
+    plot_FA(outname, show=True)
 
 
 if __name__ == "__main__":

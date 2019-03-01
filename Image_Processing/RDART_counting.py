@@ -79,7 +79,6 @@ for i, num in enumerate(edges):
     if PLOT:
         plt.show()
     results[i] = [ratio, greentest, redtest, pinkbackground, pinkmax]
-    print("Wrote result {}".format(i))
 
 w = csv.writer(open("RDART_counting_summary_test.csv", "w"))
 w.writerow(COLUMN_TITLES)
