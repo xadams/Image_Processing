@@ -95,7 +95,7 @@ def main():
         proc_sheet(filename, outname, False)
     ## Comment following line in for peak graphs and debugging
     # proc_sheet(filename,outname, True)
-    plot_FA(outname, show=False)
+    plot_FA([outname,"data/190221_result_summary.csv"], show=True)
 
 
 if __name__ == "__main__":
