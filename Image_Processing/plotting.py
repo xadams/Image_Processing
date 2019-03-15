@@ -54,7 +54,7 @@ def plot_FA(inputfiles, show=False):
             plt.ylabel("Ratio of Green to Red Intensity")
             plt.legend(loc='best')
         if not show:
-            inputbase = input.split('_')[0]
+            inputbase = inp.split('_')[0]
             plt.savefig(inputbase + "_PeakHeightRatios.png")
 
         plt.figure()
@@ -109,8 +109,10 @@ def plot_FA(inputfiles, show=False):
             plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
             plt.ylabel("Ratio of Green to Red Intensity")
             plt.legend(loc='best')
-    plt.figure()
+    if not show:
+        plt.savefig("data/AllExperiments_PeakRatio.png")
 
+    plt.figure()
     for i, T in enumerate(times):
         plt.title("Average Ratio of Green to Red Intensity Peak Heights Across Experiments")
         for j, Tr in enumerate(treatments):
@@ -131,6 +133,8 @@ def plot_FA(inputfiles, show=False):
         plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
         plt.ylabel("Ratio of Green to Red Intensity")
         plt.legend(loc='best')
+    if not show:
+        plt.savefig("data/AllExperiments_AreaRatio.png")
 
     if show:
         plt.show()
