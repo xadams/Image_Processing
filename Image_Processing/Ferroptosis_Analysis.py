@@ -4,7 +4,7 @@ import numpy as np
 import rampy
 from scipy import signal
 import csv
-from plotting import plot_FA
+from plotting import plot_FA, PlotComparison
 import os
 import matplotlib.pyplot as plt
 import warnings
@@ -67,7 +67,7 @@ def proc_sheet(filename, outname, plot_peaks=False):
                 if PLOT_RAW:
                     ax.plot(red, color='red')
                     ax.plot(green, color='green')
-            except:
+            except NameError:
                 ax.set_title(title)
                 ax.plot(red_corrected, color='red')
                 ax.scatter(red_peaksx, red_peaksy['peak_heights'], color=plt.cm.Reds([0.75]), marker='o')
@@ -89,13 +89,15 @@ def proc_sheet(filename, outname, plot_peaks=False):
 
 
 def main():
-    filename = "data/190228.xlsx"
+    # filename = "data/190321zappedinwells.xlsx"
+    filename = "data/190328cytospin.xlsx"
     outname = os.path.splitext(filename)[0] + "_result_summary.csv"
+    # Comment following line in for peak graphs and debugging
+    # proc_sheet(filename,outname, True)
     if not os.path.isfile(outname):
         proc_sheet(filename, outname, False)
-    ## Comment following line in for peak graphs and debugging
-    # proc_sheet(filename,outname, True)
-    plot_FA([outname,"data/190221_result_summary.csv","data/190214_result_summary.csv"], show=False)
+    # plot_FA([outname], show=False)
+    PlotComparison(["data/erastin_result_summary.csv","data/190321zappedinwells_result_summary.csv",outname], show=False)
 
 
 if __name__ == "__main__":
