@@ -9,10 +9,21 @@ import os
 import matplotlib.pyplot as plt
 import warnings
 
+# Dictionary Keywords
+PEAK_RATIO_AVG = 'Average Peak Ratio'
+PEAK_RATIO_STD = 'Peak Ratio Standard of Deviation'
+AREA_RATIO = 'Area Ratio'
+TIME = 'Time'
+CONC = 'Concentration'
+TREATMENT = 'Treatment'
+REPLICA = 'Replica'
+DATE = 'Date'
+ENV = 'Environment'
+
 
 def proc_sheet(filename, outname, plot_peaks=False):
     data = pd.ExcelFile(filename)
-    results = {}
+    results = []
     # for title in ["60min 1uL Treated"]:
     for title in data.sheet_names:
         s = pd.read_excel(data, title).dropna(thresh=3)
@@ -59,7 +70,17 @@ def proc_sheet(filename, outname, plot_peaks=False):
 
         peak_ratio = green_peaksy['peak_heights'] / red_peaksy['peak_heights']
         area_ratio = np.trapz(green_corrected, axis=0) / np.trapz(red_corrected, axis=0)
-        results[title] = [peak_ratio.mean(), peak_ratio.std(), area_ratio[0]]
+        # Variable region for each experiment sheet naming scheme
+        sheetname = title.split(' ')
+        conc = sheetname[0]
+        tr = sheetname[2][0]
+        rep = sheetname[-1]
+        date = filename[5:11]
+        ti = sheetname[3]
+        env = "Well Plate"
+        result = {CONC: conc, TIME: ti, TREATMENT: tr, ENV: env, DATE: date, REPLICA: rep,
+                  PEAK_RATIO_AVG: peak_ratio.mean(), PEAK_RATIO_STD: peak_ratio.std(), AREA_RATIO: area_ratio[0], }
+        results.append(result)
         # PLOT_RAW = True
         if plot_peaks:
             fig, ax = plt.subplots()
@@ -83,21 +104,24 @@ def proc_sheet(filename, outname, plot_peaks=False):
                 #          fontsize=14, verticalalignment='top')
         plt.show()
 
-    w = csv.writer(open(outname, "w"))
-    for key, val in results.items():
-        w.writerow([key, val])
+    with open(outname, "w") as csvfile:
+        w = csv.DictWriter(csvfile,
+                           fieldnames=[CONC, TIME, TREATMENT, ENV, DATE, REPLICA, PEAK_RATIO_AVG, PEAK_RATIO_STD,
+                                       AREA_RATIO])
+        w.writeheader()
+        for result in results:
+            w.writerow(result)
 
 
 def main():
-    # filename = "data/190321zappedinwells.xlsx"
-    filename = "data/190328cytospin.xlsx"
+    filename = "data/190321zappedinwells.xlsx"
     outname = os.path.splitext(filename)[0] + "_result_summary.csv"
     # Comment following line in for peak graphs and debugging
     # proc_sheet(filename,outname, True)
     if not os.path.isfile(outname):
         proc_sheet(filename, outname, False)
     # plot_FA([outname], show=False)
-    PlotComparison(["data/erastin_result_summary.csv","data/190321zappedinwells_result_summary.csv",outname], show=False)
+    # PlotComparison(["data/erastin_result_summary.csv","data/190321zappedinwells_result_summary.csv",outname], show=False)
 
 
 if __name__ == "__main__":
