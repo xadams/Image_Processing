@@ -19,7 +19,8 @@ TREATMENT = 'Treatment'
 REPLICA = 'Replica'
 DATE = 'Date'
 ENV = 'Environment'
-
+FIELD_NAMES = [CONC, TIME, TREATMENT, ENV, DATE, REPLICA, PEAK_RATIO_AVG, PEAK_RATIO_STD,
+                                       AREA_RATIO]
 
 def proc_sheet(filename, outname, plot_peaks=False):
     data = pd.ExcelFile(filename)
@@ -73,11 +74,15 @@ def proc_sheet(filename, outname, plot_peaks=False):
         # Variable region for each experiment sheet naming scheme
         sheetname = title.split(' ')
         conc = sheetname[0]
-        tr = sheetname[2][0]
+        treatment_code = sheetname[2][0]
+        if  treatment_code == 'u':
+            tr = 'Radiation-'
+        elif treatment_code == 'z':
+            tr = 'Radiation+'
         rep = sheetname[-1]
         date = filename[5:11]
         ti = sheetname[3]
-        env = "Well Plate"
+        env = "Cytospin"
         result = {CONC: conc, TIME: ti, TREATMENT: tr, ENV: env, DATE: date, REPLICA: rep,
                   PEAK_RATIO_AVG: peak_ratio.mean(), PEAK_RATIO_STD: peak_ratio.std(), AREA_RATIO: area_ratio[0], }
         results.append(result)
@@ -106,15 +111,14 @@ def proc_sheet(filename, outname, plot_peaks=False):
 
     with open(outname, "w") as csvfile:
         w = csv.DictWriter(csvfile,
-                           fieldnames=[CONC, TIME, TREATMENT, ENV, DATE, REPLICA, PEAK_RATIO_AVG, PEAK_RATIO_STD,
-                                       AREA_RATIO])
+                           fieldnames=FIELD_NAMES)
         w.writeheader()
         for result in results:
             w.writerow(result)
 
 
 def main():
-    filename = "data/190321zappedinwells.xlsx"
+    filename = "data/190328cytospin.xlsx"
     outname = os.path.splitext(filename)[0] + "_result_summary.csv"
     # Comment following line in for peak graphs and debugging
     # proc_sheet(filename,outname, True)

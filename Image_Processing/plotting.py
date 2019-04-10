@@ -8,20 +8,8 @@ def plot_FA(inputfiles, show=False):
     peak_per_exp = []
     area_per_exp = []
     for inp in inputfiles:
-        results = []
-        with open(inp, "rt") as csvfile:
-            fin = csv.reader(csvfile)
-            for row in fin:
-                title = row[0].split()
-                # results.append([title[0][0:2], title[1][0], title[2][0], # This slicing works for the sheet titles in 180808
-                results.append([title[3], title[0], title[2][0],
-                                row[1].split()[0].strip(",").strip("["),
-                                row[1].split()[1].strip(",").strip("["),
-                                row[1].split()[2].strip(",").strip("]"),  # ])
-                                title[-1]])
-        frame = pd.DataFrame(results,
-                             columns=['Time', 'Concentration', 'Treatment', 'Average Peak Ratio', 'Peak Ratio std',
-                                      'Area Ratio', 'Replica']).sort_values(by=['Concentration','Treatment'])
+        data = pd.read_csv(inp)
+        frame = pd.DataFrame(data).sort_values(by=['Concentration','Treatment'])
         # TODO:Add check that flags if times,concs, or treatments are unexpected values
         times = frame.Time.unique()
         treatments = frame.Treatment.unique()
@@ -48,7 +36,7 @@ def plot_FA(inputfiles, show=False):
                     yerr.append(y_samples.std())
                     peak_per_exp.append([x, y_samples.mean(), T, Tr, inp[5:11]])
                 plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
-                             yerr=np.asarray(yerr, dtype=float),
+                             yerr=np.asarray(yerr, dtype=float), capsize=8,
                              label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
             plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
             plt.ylabel("Ratio of Green to Red Intensity")
@@ -73,7 +61,7 @@ def plot_FA(inputfiles, show=False):
                     yerr.append(y_samples.std())
                     area_per_exp.append([x, y_samples.mean(), T, Tr, inp[5:11]])
                 plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
-                             yerr=np.asarray(yerr, dtype=float),
+                             yerr=np.asarray(yerr, dtype=float), capsize=8,
                              label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
             plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
             plt.ylabel("Ratio of Green to Red Intensity")
@@ -104,7 +92,7 @@ def plot_FA(inputfiles, show=False):
                     ybar.append(y_samples.mean())
                     yerr.append(y_samples.std())
                 plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
-                             yerr=np.asarray(yerr, dtype=float),
+                             yerr=np.asarray(yerr, dtype=float), capsize=8,
                              label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
             plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
             plt.ylabel("Ratio of Green to Red Intensity")
@@ -128,7 +116,7 @@ def plot_FA(inputfiles, show=False):
                     ybar.append(y_samples.mean())
                     yerr.append(y_samples.std())
                 plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
-                             yerr=np.asarray(yerr, dtype=float),
+                             yerr=np.asarray(yerr, dtype=float), capsize=8,
                              label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
             plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
             plt.ylabel("Ratio of Green to Red Intensity")
