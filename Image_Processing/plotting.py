@@ -5,14 +5,17 @@ import csv
 
 
 def plot_FA(inputfiles, show=False):
+    var1, var2, var3 = 'Time', 'Environment', 'Treatment'  # x, color, shade
+    filtervar, filterterm = 'Cell Line', 'HT1080'
     peak_per_exp = []
     area_per_exp = []
     for inp in inputfiles:
         data = pd.read_csv(inp)
-        frame = pd.DataFrame(data).sort_values(by=['Concentration','Treatment'])
+        frame = pd.DataFrame(data).sort_values(by=[var1, var2])
+        frame = frame[frame[filtervar] == filterterm]
         # TODO:Add check that flags if times,concs, or treatments are unexpected values
-        times = frame.Time.unique()
-        treatments = frame.Treatment.unique()
+        times = frame[var3].unique()
+        treatments = frame[var2].unique()
 
         n_colors = len(times)
         blues = plt.cm.Blues(np.linspace(0.25, 0.75, n_colors))
@@ -26,19 +29,20 @@ def plot_FA(inputfiles, show=False):
                 xbar = []
                 ybar = []
                 yerr = []
-                x_samples = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
+                x_samples = frame[var1][(frame[var3] == T) & (frame[var2] == Tr)]
                 for x in x_samples.unique():
                     y_samples = np.asarray(
-                        frame['Average Peak Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr) & (
-                                frame['Concentration'] == x)], dtype=float)
+                        frame['Average Peak Ratio'][(frame[var3] == T) & (frame[var2] == Tr) & (
+                                frame[var1] == x)], dtype=float)
                     xbar.append(x)
                     ybar.append(y_samples.mean())
                     yerr.append(y_samples.std())
                     peak_per_exp.append([x, y_samples.mean(), T, Tr, inp[5:11]])
-                plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
+                plt.errorbar(np.asarray(xbar), np.asarray(ybar, dtype=float),
                              yerr=np.asarray(yerr, dtype=float), capsize=8,
-                             label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
-            plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
+                             label="{} = {}, {} = {}".format(var3, T, var2, Tr), color=cmap[j][i])
+            # plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
+            plt.xlabel("Incubation Time (min)")
             plt.ylabel("Ratio of Green to Red Intensity")
             plt.legend(loc='best')
         if not show:
@@ -52,20 +56,21 @@ def plot_FA(inputfiles, show=False):
                 xbar = []
                 ybar = []
                 yerr = []
-                x_samples = frame['Concentration'][(frame['Time'] == T) & (frame['Treatment'] == Tr)]
+                x_samples = frame[var1][(frame[var3] == T) & (frame[var2] == Tr)]
                 for x in x_samples.unique():
-                    y_samples = np.asarray(frame['Area Ratio'][(frame['Time'] == T) & (frame['Treatment'] == Tr) & (
-                            frame['Concentration'] == x)], dtype=float)
+                    y_samples = np.asarray(frame['Area Ratio'][(frame[var3] == T) & (frame[var2] == Tr) & (
+                            frame[var1] == x)], dtype=float)
                     xbar.append(x)
                     ybar.append(y_samples.mean())
                     yerr.append(y_samples.std())
                     area_per_exp.append([x, y_samples.mean(), T, Tr, inp[5:11]])
-                plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
+                plt.errorbar(np.asarray(xbar), np.asarray(ybar, dtype=float),
                              yerr=np.asarray(yerr, dtype=float), capsize=8,
-                             label="Time = {}min, Treatment = {}".format(T, Tr), color=cmap[j][i])
-            plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
+                             label="{} = {}, {} = {}".format(var3, T, var2, Tr), color=cmap[j][i])
+            # plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
+            plt.xlabel("Incubation Time (min)")
             plt.ylabel("Ratio of Green to Red Intensity")
-            # plt.legend(loc='lower right')
+            plt.legend(loc='best')
         if not show:
             plt.savefig(inputbase + "_AreaRatio.png")
 
@@ -124,11 +129,13 @@ def plot_FA(inputfiles, show=False):
         if not show:
             plt.savefig("data/AllExperiments_AreaRatio.png")
 
-        if show:
-            plt.show()
+    if show:
+        plt.show()
+
 
 def PlotComparison(inputfiles, show=False):
-    for i, (inp,exp_name) in enumerate(zip(inputfiles,[['Erastin','Well Plate'],['Radiation','Well Plate'],['Radiation','Cytospin']])):
+    for i, (inp, exp_name) in enumerate(
+            zip(inputfiles, [['Erastin', 'Well Plate'], ['Radiation', 'Well Plate'], ['Radiation', 'Cytospin']])):
         results = []
         with open(inp, "rt") as csvfile:
             fin = csv.reader(csvfile)
@@ -139,10 +146,11 @@ def PlotComparison(inputfiles, show=False):
                                 row[1].split()[0].strip(",").strip("["),
                                 row[1].split()[1].strip(",").strip("["),
                                 row[1].split()[2].strip(",").strip("]"),  # ])
-                                title[-1],inp[5:12]])
+                                title[-1], inp[5:12]])
         frame = pd.DataFrame(results,
                              columns=['Time', 'Concentration', 'Treatment', 'Average Peak Ratio', 'Peak Ratio std',
-                                      'Area Ratio', 'Replica', 'Experiment']).sort_values(by=['Concentration','Treatment'])
+                                      'Area Ratio', 'Replica', 'Experiment']).sort_values(
+            by=['Concentration', 'Treatment'])
         # TODO:Add check that flags if times,concs, or treatments are unexpected values
         treatments = frame.Treatment.unique()
         if treatments[0] == 't':
@@ -156,7 +164,7 @@ def PlotComparison(inputfiles, show=False):
         cmap = [blues, reds, greens]
         T = '50'
         plt.title("Comparison of Erastin and Radiation Treated HT1080 Cells")
-        for j, (Tr,state) in enumerate(zip(treatments,['-','+'])):
+        for j, (Tr, state) in enumerate(zip(treatments, ['-', '+'])):
             xbar = []
             ybar = []
             yerr = []
@@ -171,7 +179,7 @@ def PlotComparison(inputfiles, show=False):
             if ybar:
                 plt.errorbar(np.asarray(xbar, dtype=float), np.asarray(ybar, dtype=float),
                              yerr=np.asarray(yerr, dtype=float), capsize=8,
-                             label="{}{} {}".format(exp_name[0],state, exp_name[1]), color=cmap[i][j])
+                             label="{}{} {}".format(exp_name[0], state, exp_name[1]), color=cmap[i][j])
         plt.xlabel("Concentration of C11BODIPY ($\mu$M)")
         plt.ylabel("Ratio of Green to Red Intensity")
         plt.legend(loc='best')

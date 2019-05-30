@@ -19,7 +19,8 @@ TREATMENT = 'Treatment'
 REPLICA = 'Replica'
 DATE = 'Date'
 ENV = 'Environment'
-FIELD_NAMES = [CONC, TIME, TREATMENT, ENV, DATE, REPLICA, PEAK_RATIO_AVG, PEAK_RATIO_STD,
+CELL = 'Cell Line'
+FIELD_NAMES = [CONC, TIME, TREATMENT, ENV, CELL, DATE, REPLICA, PEAK_RATIO_AVG, PEAK_RATIO_STD,
                                        AREA_RATIO]
 
 def proc_sheet(filename, outname, plot_peaks=False):
@@ -31,6 +32,12 @@ def proc_sheet(filename, outname, plot_peaks=False):
         if 'CY3(1)' in s.columns:
             red = s['CY3(1)'].values
             green = s['FITC(1)'].values
+        elif 'Ch1 Cy3' in s.columns:
+            red = s['Ch1 Cy3'].values
+            green = s['Ch2 FITC'].values
+        elif 'Ch3-Cy3' in s.columns:
+            red = s['Ch3-Cy3'].values
+            green = s['Ch2-FITC'].values
         elif 'Ch1' in s.columns:
             if int(s['Ch1'].mean()) > int(s['Ch2'].mean()):
                 red = s['Ch1'].values
@@ -39,7 +46,7 @@ def proc_sheet(filename, outname, plot_peaks=False):
                 green = s['Ch1'].values
                 red = s['Ch2'].values
         else:
-            print("Neither 'CY3(1)' nor 'Ch1' columns detected. Exiting")
+            print("Neither 'CY3(1)' nor 'Ch1' columns detected in sheet {}. Exiting".format(title))
             exit(2)
             # TODO: Make this exit in a more pythonic way
         n = len(red)
@@ -73,17 +80,21 @@ def proc_sheet(filename, outname, plot_peaks=False):
         area_ratio = np.trapz(green_corrected, axis=0) / np.trapz(red_corrected, axis=0)
         # Variable region for each experiment sheet naming scheme
         sheetname = title.split(' ')
-        conc = sheetname[0]
-        treatment_code = sheetname[2][0]
-        if  treatment_code == 'u':
+        conc = 1.5 #sheetname[0]
+        treatment_code = sheetname[2][-1]
+        if  treatment_code == '-':
             tr = 'Radiation-'
-        elif treatment_code == 'z':
+        elif treatment_code == '+':
             tr = 'Radiation+'
         rep = sheetname[-1]
         date = filename[5:11]
-        ti = sheetname[3]
-        env = "Cytospin"
-        result = {CONC: conc, TIME: ti, TREATMENT: tr, ENV: env, DATE: date, REPLICA: rep,
+        ti = sheetname[0]
+        if sheetname[1] == 'Well':
+            env = "Well Plate"
+        else:
+            env = "C11 -> Cyto"
+        cell_line = "HT1080"
+        result = {CONC: conc, TIME: ti, TREATMENT: tr, ENV: env, CELL: cell_line, DATE: date, REPLICA: rep,
                   PEAK_RATIO_AVG: peak_ratio.mean(), PEAK_RATIO_STD: peak_ratio.std(), AREA_RATIO: area_ratio[0], }
         results.append(result)
         # PLOT_RAW = True
@@ -118,13 +129,13 @@ def proc_sheet(filename, outname, plot_peaks=False):
 
 
 def main():
-    filename = "data/190328cytospin.xlsx"
-    outname = os.path.splitext(filename)[0] + "_result_summary.csv"
+    filename = "data/190522Ferroptosis.xlsx"
+    outname = "data/processed/" + os.path.splitext(filename)[0].split('/')[-1] + "_result_summary.csv"
     # Comment following line in for peak graphs and debugging
     # proc_sheet(filename,outname, True)
     if not os.path.isfile(outname):
         proc_sheet(filename, outname, False)
-    # plot_FA([outname], show=False)
+    plot_FA([outname], show=False)
     # PlotComparison(["data/erastin_result_summary.csv","data/190321zappedinwells_result_summary.csv",outname], show=False)
 
 
